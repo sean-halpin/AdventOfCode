@@ -18,19 +18,19 @@ def checksum(input: String): Int = {
 }
 
 def converter[F[_]](implicit F: Sync[F]): F[Unit] =
-  io.file.readAll[F](Paths.get(filePath + "2017_Day_2_Input.csv"), 4096)
+  io.file.readAll[F](Paths.get(filePath + "2017_Day_2_Input.tsv"), 4096)
     .through(text.utf8Decode)
     .through(text.lines)
     .map(line => checksum(line).toString + "\t")
     .through(text.lines)
     .through(text.utf8Encode)
-    .through(io.file.writeAll(Paths.get(filePath + "2017_Day_2_Output.csv")))
+    .through(io.file.writeAll(Paths.get(filePath + "2017_Day_2_Output.tsv")))
     .runSync
 
 // at the end of the universe...
 val u: Unit = converter[IO].unsafeRunSync()
 
-val bufferedSource = scala.io.Source.fromFile(filePath + "2017_Day_2_Output.csv")
+val bufferedSource = scala.io.Source.fromFile(filePath + "2017_Day_2_Output.tsv")
 val checkSums = bufferedSource.getLines().mkString("").split('\t').map(_ toInt)
 bufferedSource.close
 checkSums.toList.foldLeft(0)(_ + _)
