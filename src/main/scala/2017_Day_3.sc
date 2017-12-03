@@ -1,3 +1,6 @@
+//http://adventofcode.com/2017/day/3
+//input = 368078
+
 trait Heading {
   def turnLeft(): Heading = this match {
     case North => West
