@@ -4,8 +4,11 @@
 import cats.effect.{IO, Sync}
 import fs2.{io, text}
 import java.nio.file.Paths
+import java.util.concurrent.atomic.AtomicInteger
 
-val filePath = "....../adventOfCode/src/main/scala/"
+val filePath = "/Users/shalpin/src/adventProblems/AdventOfCode/src/main/scala/"
+
+var atomicInt : AtomicInteger = new AtomicInteger(0)
 
 def checksum(input: String): Int = {
   val values = input.split('\t').map(_ toInt)
@@ -21,16 +24,10 @@ def converter[F[_]](implicit F: Sync[F]): F[Unit] =
   io.file.readAll[F](Paths.get(filePath + "2017_Day_2_Input.tsv"), 4096)
     .through(text.utf8Decode)
     .through(text.lines)
-    .map(line => checksum(line).toString + "\t")
-    .through(text.lines)
-    .through(text.utf8Encode)
-    .through(io.file.writeAll(Paths.get(filePath + "2017_Day_2_Output.tsv")))
+    .map(line => atomicInt.getAndAdd(checksum(line)))
     .runSync
 
 // at the end of the universe...
 val u: Unit = converter[IO].unsafeRunSync()
 
-val bufferedSource = scala.io.Source.fromFile(filePath + "2017_Day_2_Output.tsv")
-val checkSums = bufferedSource.getLines().mkString("").split('\t').map(_ toInt)
-bufferedSource.close
-checkSums.toList.foldLeft(0)(_ + _)
+println(atomicInt.get())

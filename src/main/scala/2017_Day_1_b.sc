@@ -12,3 +12,4 @@ zipCompare.foldLeft(0)((acc,item)=>
   if(item._1 == item._2) acc + item._1
   else acc
 )
+//res0: Int = 1232
