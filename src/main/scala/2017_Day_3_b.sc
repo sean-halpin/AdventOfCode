@@ -15,12 +15,53 @@ case object South extends Heading
 case object East extends Heading
 case object West extends Heading
 
-class SpiralState(val currentValue: Int, val Cords: (Int,Int),
-                  stepMic: Int, stepMicMax: Int,
-                  stepMac: Int, stepMacMax: Int,
-                  heading: Heading) {
+class SpiralState(var currentValue: Int, val Cords: (Int,Int),
+                  val stepMic: Int, val stepMicMax: Int,
+                  val stepMac: Int, val stepMacMax: Int,
+                  val heading: Heading, val previousState: Option[SpiralState]) {
+  def AreAdjacent(state1: SpiralState, state2: SpiralState): Boolean = {
+    val cordDiff = (state1.Cords._1 - state2.Cords._1,
+      state1.Cords._2 - state2.Cords._2)
+    cordDiff match {
+      case (1,1) => true
+      case (1,0) => true
+      case (1,-1) => true
+      case (-1,1) => true
+      case (-1,0) => true
+      case (-1,-1) => true
+      case (0,-1) => true
+      case (0,1) => true
+      case _ => false
+    }
+  }
+  def calcCurrentValue = {
+      def getPreviousStates(latest: SpiralState): List[SpiralState] = {
+        latest.previousState match {
+          case None => latest :: Nil
+          case Some(p) => latest :: getPreviousStates(p)
+        }
+      }
+    if(this.previousState.isDefined) {
+      val allPreviousAdjacent = getPreviousStates(this.previousState.get).filter(s =>
+        AreAdjacent(s, this))
+      //print(this.Cords)
+      //println(getPreviousStates(this).map(_.Cords))
+      //println(allPreviousAdjacent.map(_.Cords))
+      allPreviousAdjacent.map(_.currentValue).sum
+    }
+    else 1
+  }
+  currentValue = calcCurrentValue
+
   def next(): SpiralState = {
-    val nextValue = currentValue + 1
+    val nextCords = {
+      heading match {
+        case North => (Cords._1, Cords._2 + 1)
+        case South => (Cords._1, Cords._2 - 1)
+        case East => (Cords._1 + 1, Cords._2)
+        case West => (Cords._1 - 1, Cords._2)
+      }
+    }
     val nextStepMic = {
       if (stepMic == stepMicMax) 1
       else stepMic + 1
@@ -38,27 +79,20 @@ class SpiralState(val currentValue: Int, val Cords: (Int,Int),
       case true => heading.turnLeft
       case false => heading
     }
-    val nextCords = {
-      heading match {
-        case North => (Cords._1, Cords._2 + 1)
-        case South => (Cords._1, Cords._2 - 1)
-        case East => (Cords._1 + 1, Cords._2)
-        case West => (Cords._1 - 1, Cords._2)
-      }
-    }
-    new SpiralState(nextValue, nextCords,
+    new SpiralState(-1, nextCords,
       nextStepMic, nextStepMicMax,
       nextStepMac, stepMacMax,
-      nextHeading)
+      nextHeading, Some(this))
   }
 }
 val beginningState = new SpiralState(1, (0,0),
   1, 1,
   1, 2,
-  East)
-val target = 368078
-val result = (1 until target).foldLeft(beginningState){ (acc : SpiralState, i: Int) =>
+  East, None)
+val target = 65
+val result = (1 until target).foldLeft(beginningState){ (acc : SpiralState, _: Int) =>
   acc.next()
 }
 
-result.Cords // (-68,-303) 68 + 303 = 371
+result.Cords // res0: (Int, Int) = (-4,4)
+result.currentValue // res1: Int = 369601
