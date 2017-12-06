@@ -19,7 +19,7 @@ val jumpListLength = jumpList.length
 var programCounter = 0
 var programPointer = 0
 while(programPointer < jumpListLength){
-  programCounter+=1
+  programCounter += 1
   programPointer += jumpList(programPointer).getJumpVar();
 }
 println(programCounter) //373160
