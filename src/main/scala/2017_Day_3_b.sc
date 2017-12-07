@@ -35,18 +35,15 @@ class SpiralState(var currentValue: Int, val Cords: (Int,Int),
     }
   }
   def calcCurrentValue = {
-      def getPreviousStates(latest: SpiralState): List[SpiralState] = {
+      def getPreviousStates(latest: SpiralState, acc: List[SpiralState] = Nil): List[SpiralState] = {
         latest.previousState match {
-          case None => latest :: Nil
-          case Some(p) => latest :: getPreviousStates(p)
+          case None => acc
+          case Some(p) =>  getPreviousStates(p, latest :: acc)
         }
       }
     if(this.previousState.isDefined) {
       val allPreviousAdjacent = getPreviousStates(this.previousState.get).filter(s =>
         AreAdjacent(s, this))
-      //print(this.Cords)
-      //println(getPreviousStates(this).map(_.Cords))
-      //println(allPreviousAdjacent.map(_.Cords))
       allPreviousAdjacent.map(_.currentValue).sum
     }
     else 1
